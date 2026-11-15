@@ -1,0 +1,150 @@
+<section class="pagina" aria-labelledby="titulo-formulario">
+  <h1 id="titulo-formulario">{{ editando ? 'Editar livro' : 'Novo livro' }}</h1>
+
+  @if (carregando()) {
+    <p class="aviso" role="status">Carregando o livro...</p>
+  } @else {
+    <div class="layout">
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <fieldset>
+          <legend>Sobre o livro</legend>
+
+          <label class="campo">
+            <span>Título</span>
+            <input formControlName="titulo" required autocomplete="off" />
+          </label>
+          @if (form.controls.titulo.touched && form.controls.titulo.invalid) {
+            <small class="erro">Informe o título, com até 200 caracteres.</small>
+          }
+
+          <label class="campo">
+            <span>Autor</span>
+            <input formControlName="autor" required autocomplete="off" />
+          </label>
+          @if (form.controls.autor.touched && form.controls.autor.invalid) {
+            <small class="erro">Informe o autor, com até 150 caracteres.</small>
+          }
+
+          <div class="linha">
+            <label class="campo">
+              <span>Formato</span>
+              <select formControlName="formato">
+                <option value="Fisico">{{ rotulosFormato.Fisico }}</option>
+                <option value="Virtual">{{ rotulosFormato.Virtual }}</option>
+              </select>
+            </label>
+
+            <label class="campo">
+              <span>Páginas <small>opcional</small></span>
+              <input type="number" min="1" formControlName="totalPaginas" />
+            </label>
+          </div>
+          @if (form.controls.totalPaginas.invalid) {
+            <small class="erro">O total de páginas deve ser maior que zero.</small>
+          }
+
+          <div class="linha">
+            <label class="campo">
+              <span>Gênero <small>opcional</small></span>
+              <input formControlName="genero" />
+            </label>
+
+            <label class="campo">
+              <span>ISBN <small>opcional</small></span>
+              <input formControlName="isbn" autocomplete="off" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Capa</legend>
+
+          <label class="campo">
+            <span>Link da imagem <small>opcional</small></span>
+            <input type="url" formControlName="capaUrl" placeholder="https://"
+                   autocomplete="off" aria-describedby="ajuda-capa" />
+          </label>
+          <small id="ajuda-capa" class="ajuda">
+            Cole o endereço de uma imagem da internet. Sem link, a estante procura a capa pelo ISBN
+            na Open Library e, se não encontrar, desenha uma capa com o título.
+          </small>
+          @if (form.controls.capaUrl.invalid) {
+            <small class="erro">Use um endereço completo, começando com http:// ou https://.</small>
+          }
+        </fieldset>
+
+        @if (editando) {
+          <fieldset>
+            <legend>Anotações</legend>
+
+            <label class="campo">
+              <span class="visualmente-oculto">Anotações</span>
+              <textarea formControlName="anotacoes" rows="6"></textarea>
+            </label>
+            @if (form.controls.anotacoes.invalid) {
+              <small class="erro">As anotações podem ter até 4000 caracteres.</small>
+            }
+          </fieldset>
+        } @else {
+          <fieldset>
+            <legend>Sua leitura</legend>
+
+            <label class="campo">
+              <span>Situação</span>
+              <select formControlName="status">
+                @for (opcao of statusIniciais; track opcao) {
+                  <option [value]="opcao">{{ rotulosStatus[opcao] }}</option>
+                }
+              </select>
+            </label>
+
+            @if (status() === 'Lendo' || status() === 'Lido') {
+              <div class="linha">
+                <label class="campo">
+                  <span>Início da leitura <small>opcional</small></span>
+                  <input type="date" formControlName="dataInicioLeitura" />
+                </label>
+
+                @if (status() === 'Lido') {
+                  <label class="campo">
+                    <span>Fim da leitura <small>opcional</small></span>
+                    <input type="date" formControlName="dataFimLeitura" />
+                  </label>
+                }
+              </div>
+            }
+
+            @if (status() === 'Lido') {
+              <label class="campo">
+                <span>Avaliação</span>
+                <select formControlName="avaliacao">
+                  <option [ngValue]="null">Sem avaliação</option>
+                  @for (nota of notas; track nota) {
+                    <option [ngValue]="nota">{{ nota }} {{ nota === 1 ? 'estrela' : 'estrelas' }}</option>
+                  }
+                </select>
+              </label>
+            }
+          </fieldset>
+        }
+
+        @if (erro()) {
+          <p class="erro" role="alert">{{ erro() }}</p>
+        }
+
+        <div class="acoes">
+          <a routerLink="/">Cancelar</a>
+          <button type="submit" class="botao botao-primario" [disabled]="salvando()">
+            {{ editando ? 'Salvar alterações' : 'Adicionar à estante' }}
+          </button>
+        </div>
+      </form>
+
+      <aside class="previa" aria-hidden="true">
+        <app-capa-livro [titulo]="previa().titulo" [autor]="previa().autor"
+                        [capaUrl]="previa().capaUrl" [isbn]="previa().isbn" />
+        <p>Assim o livro aparece na estante.</p>
+      </aside>
+    </div>
+  }
+</section>

@@ -1,0 +1,82 @@
+.cabecalho,
+.avisos,
+.conteudo,
+.rodape {
+  width: min(100% - 32px, 960px);
+  margin-inline: auto;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 20px 0;
+}
+
+.marca {
+  font-family: var(--fonte-livro);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.cabecalho ul {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cabecalho a:not(.botao) {
+  color: var(--tinta);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cabecalho a.ativo:not(.botao) {
+  text-decoration: underline;
+  text-decoration-color: var(--latao);
+  text-decoration-thickness: 2px;
+}
+
+/* Aviso de versão nova do app, entre o cabeçalho e o conteúdo. */
+.faixa-versao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+  padding: 10px 10px 10px 16px;
+  border: 1px solid var(--verde);
+  border-left-width: 4px;
+  border-radius: 4px;
+  background: var(--verde-claro);
+}
+
+.faixa-versao p {
+  margin: 0;
+  font-weight: 700;
+}
+
+.conteudo {
+  padding: 32px clamp(16px, 4vw, 40px) 40px;
+  border: 1px solid var(--linha);
+  border-radius: 4px;
+  background: var(--papel);
+}
+
+.rodape {
+  padding: 20px 0 32px;
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+.rodape p {
+  margin: 0;
+}

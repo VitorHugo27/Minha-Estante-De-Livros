@@ -1,0 +1,126 @@
+<section aria-labelledby="titulo-estatisticas">
+  <h1 id="titulo-estatisticas">Estatísticas</h1>
+
+  @if (carregando()) {
+    <p class="aviso" role="status">Calculando suas estatísticas...</p>
+  } @else if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  } @else {
+    @if (estatisticas(); as dados) {
+      @if (dados.totalLivros === 0) {
+        <div class="vazio">
+          <p>Sua estante ainda está vazia. Adicione livros para ver suas estatísticas.</p>
+          <a class="botao botao-primario" routerLink="/livros/novo">Adicionar livro</a>
+        </div>
+      } @else {
+        <section class="bloco" aria-labelledby="titulo-anos">
+          <h2 id="titulo-anos">Lidos por ano</h2>
+
+          @for (ano of dados.lidosPorAno; track ano.ano) {
+            <div class="ano">
+              <div class="cabecalho-ano">
+                <h3>{{ ano.ano }}</h3>
+                <p class="detalhe">
+                  {{ quantos(ano.livros.length, 'livro', 'livros') }}, {{ quantos(ano.paginas, 'página', 'páginas') }}
+                </p>
+              </div>
+
+              <ul class="prateleira" [attr.aria-label]="'Livros lidos em ' + ano.ano">
+                @for (livro of ano.livros; track $index) {
+                  <li [title]="livro.titulo + (livro.paginas ? ', ' + livro.paginas + ' páginas' : '')">
+                    <span class="lombada" [attr.data-tecido]="tecido(livro.titulo)"
+                          [style.height.px]="alturaDaLombada(livro.paginas)">
+                      <span class="titulo-lombada">{{ livro.titulo }}</span>
+                    </span>
+                  </li>
+                }
+              </ul>
+            </div>
+          } @empty {
+            <p class="aviso">Quando você terminar um livro, ele aparece aqui, na prateleira do ano.</p>
+          }
+
+          @if (dados.lidosSemData > 0) {
+            <p class="detalhe">
+              {{ quantos(dados.lidosSemData, 'livro lido', 'livros lidos') }} sem data de conclusão
+              {{ dados.lidosSemData === 1 ? 'fica' : 'ficam' }} fora das prateleiras.
+            </p>
+          }
+        </section>
+
+        <div class="colunas">
+          <section class="bloco" aria-labelledby="titulo-resumo">
+            <h2 id="titulo-resumo">Resumo</h2>
+
+            <dl class="sumario">
+              <div><dt>Livros na estante</dt><dd>{{ numero(dados.totalLivros) }}</dd></div>
+              <div><dt>Lidos</dt><dd>{{ numero(dados.lidos) }}</dd></div>
+              <div><dt>Lendo agora</dt><dd>{{ numero(dados.lendo) }}</dd></div>
+              <div><dt>Quero ler</dt><dd>{{ numero(dados.queroLer) }}</dd></div>
+              <div><dt>Abandonados</dt><dd>{{ numero(dados.abandonados) }}</dd></div>
+              <div><dt>Físicos</dt><dd>{{ numero(dados.fisicos) }}</dd></div>
+              <div><dt>Virtuais</dt><dd>{{ numero(dados.virtuais) }}</dd></div>
+              <div><dt>Páginas lidas</dt><dd>{{ numero(dados.paginasLidas) }}</dd></div>
+              <div>
+                <dt>Nota média</dt>
+                <dd>{{ dados.mediaAvaliacao === null ? 'sem notas' : numero(dados.mediaAvaliacao) }}</dd>
+              </div>
+              <div>
+                <dt>Dias por livro, em média</dt>
+                <dd>{{ dados.mediaDiasPorLivro === null ? 'sem datas' : numero(dados.mediaDiasPorLivro) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <div>
+            <section class="bloco" aria-labelledby="titulo-notas">
+              <h2 id="titulo-notas">Notas</h2>
+
+              <table class="notas">
+                <caption class="visualmente-oculto">Quantidade de livros lidos por nota</caption>
+                <thead class="visualmente-oculto">
+                  <tr>
+                    <th scope="col">Nota</th>
+                    <th scope="col">Livros</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of notas(); track item.nota) {
+                    <tr>
+                      <th scope="row">
+                        <span aria-hidden="true">{{ estrelas(item.nota) }}</span>
+                        <span class="visualmente-oculto">{{ item.nota }} {{ item.nota === 1 ? 'estrela' : 'estrelas' }}</span>
+                      </th>
+                      <td>
+                        <div class="linha-nota">
+                          <span class="trilho">
+                            <span class="barra" [style.width.%]="larguraDaBarra(item.livros)"></span>
+                          </span>
+                          <span class="quantidade">{{ item.livros }}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </section>
+
+            <section class="bloco" aria-labelledby="titulo-generos">
+              <h2 id="titulo-generos">Gêneros mais lidos</h2>
+
+              @if (dados.generosMaisLidos.length > 0) {
+                <ol class="generos">
+                  @for (item of dados.generosMaisLidos; track item.genero) {
+                    <li>{{ item.genero }} <span class="detalhe">{{ quantos(item.livros, 'livro', 'livros') }}</span></li>
+                  }
+                </ol>
+              } @else {
+                <p class="aviso">Informe o gênero dos livros lidos para ver seus favoritos aqui.</p>
+              }
+            </section>
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

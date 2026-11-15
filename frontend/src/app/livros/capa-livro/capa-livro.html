@@ -1,0 +1,14 @@
+@if (imagem(); as fonte) {
+  <!-- Um elemento por endereço: o erro de uma imagem nunca marca a seguinte. -->
+  @for (atual of [fonte]; track atual) {
+    <img [src]="atual" alt="" loading="lazy" decoding="async"
+         referrerpolicy="no-referrer" (error)="marcarErro(atual)" />
+  }
+} @else {
+  <div class="tecido" [attr.data-tecido]="tecido()" aria-hidden="true">
+    <span class="titulo">{{ titulo() || 'Título do livro' }}</span>
+    @if (autor()) {
+      <span class="autor">{{ autor() }}</span>
+    }
+  </div>
+}

@@ -1,0 +1,179 @@
+<section aria-labelledby="titulo-estante">
+  <header #topo class="topo">
+    <h1 id="titulo-estante">Meus livros</h1>
+    @if (!carregando() && !erro()) {
+      <p class="contagem">
+        {{ livros().length }} {{ livros().length === 1 ? 'livro' : 'livros' }} na estante
+      </p>
+    }
+  </header>
+
+  <form class="filtros" role="search" (submit)="$event.preventDefault()">
+    <label class="campo campo-busca">
+      <span>Buscar</span>
+      <input #campoBusca type="search" placeholder="Título, autor ou gênero"
+             (input)="buscar(campoBusca.value)" />
+    </label>
+
+    <label class="campo">
+      <span>Formato</span>
+      <select #campoFormato (change)="selecionarFormato(campoFormato.value)">
+        <option value="">Todos</option>
+        <option value="Fisico">{{ rotulosFormato.Fisico }}</option>
+        <option value="Virtual">{{ rotulosFormato.Virtual }}</option>
+      </select>
+    </label>
+
+    <label class="campo">
+      <span>Ordenar por</span>
+      <select #campoOrdenacao (change)="selecionarOrdenacao(campoOrdenacao.value)">
+        <option value="titulo">Título</option>
+        <option value="autor">Autor</option>
+        <option value="recentes">Mais recentes</option>
+        <option value="avaliacao">Avaliação</option>
+      </select>
+    </label>
+  </form>
+
+  <div class="situacoes" role="group" aria-label="Filtrar por situação">
+    @for (aba of abas; track aba) {
+      <button type="button" [attr.aria-pressed]="aba === abaSelecionada()" (click)="selecionarAba(aba)">
+        {{ rotuloDaAba(aba) }} <span class="quantidade">{{ quantidade(aba) }}</span>
+      </button>
+    }
+  </div>
+
+  @if (erroAcao()) {
+    <p class="erro" role="alert">{{ erroAcao() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="aviso" role="status">Carregando seus livros...</p>
+  } @else if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  } @else if (livros().length === 0) {
+    <div class="vazio">
+      <p>Sua estante ainda está vazia.</p>
+      <a class="botao botao-primario" routerLink="/livros/novo">Adicionar o primeiro livro</a>
+    </div>
+  } @else {
+    <ul class="livros">
+      @for (livro of livrosDaPagina(); track livro.id) {
+        <li>
+          <article class="livro" [attr.aria-labelledby]="'livro-' + livro.id">
+            <app-capa-livro [titulo]="livro.titulo" [autor]="livro.autor"
+                            [capaUrl]="livro.capaUrl" [isbn]="livro.isbn" />
+
+            <div class="info">
+              <header>
+                <h2 [id]="'livro-' + livro.id">{{ livro.titulo }}</h2>
+                <p class="autor">{{ livro.autor }}</p>
+              </header>
+
+              <dl class="ficha">
+                <div [attr.data-status]="livro.status">
+                  <dt class="visualmente-oculto">Situação</dt>
+                  <dd>{{ rotulosStatus[livro.status] }}</dd>
+                </div>
+                <div>
+                  <dt class="visualmente-oculto">Formato</dt>
+                  <dd>{{ rotulosFormato[livro.formato] }}</dd>
+                </div>
+                @if (livro.genero) {
+                  <div>
+                    <dt class="visualmente-oculto">Gênero</dt>
+                    <dd>{{ livro.genero }}</dd>
+                  </div>
+                }
+                @if (livro.totalPaginas) {
+                  <div>
+                    <dt class="visualmente-oculto">Tamanho</dt>
+                    <dd>{{ livro.totalPaginas }} páginas</dd>
+                  </div>
+                }
+              </dl>
+
+              @switch (livro.status) {
+                @case ('Lendo') {
+                  @if (livro.dataInicioLeitura; as inicio) {
+                    <p class="leitura">Lendo desde <time [attr.datetime]="inicio">{{ inicio | date: 'dd/MM/yyyy' }}</time></p>
+                  }
+                }
+                @case ('Lido') {
+                  @if (livro.dataFimLeitura; as fim) {
+                    <p class="leitura">Lido em <time [attr.datetime]="fim">{{ fim | date: 'dd/MM/yyyy' }}</time></p>
+                  }
+                }
+                @case ('Abandonado') {
+                  @if (livro.dataInicioLeitura; as inicio) {
+                    <p class="leitura">Começou em <time [attr.datetime]="inicio">{{ inicio | date: 'dd/MM/yyyy' }}</time></p>
+                  }
+                }
+              }
+
+              <footer class="acoes">
+                @switch (livro.status) {
+                  @case ('QueroLer') {
+                    <button type="button" class="botao" (click)="iniciar(livro)">Começar a ler</button>
+                  }
+                  @case ('Lendo') {
+                    <button type="button" class="botao" (click)="concluir(livro)">Concluir</button>
+                    <button type="button" class="botao" (click)="abandonar(livro)">Abandonar</button>
+                  }
+                  @case ('Abandonado') {
+                    <button type="button" class="botao" (click)="iniciar(livro)">Retomar</button>
+                  }
+                  @case ('Lido') {
+                    <div class="estrelas" role="group" aria-label="Avaliação">
+                      @for (nota of notas; track nota) {
+                        <button type="button" [class.cheia]="nota <= (livro.avaliacao ?? 0)"
+                                [attr.aria-pressed]="nota === livro.avaliacao"
+                                [attr.aria-label]="'Dar nota ' + nota"
+                                (click)="avaliar(livro, nota)">{{ nota <= (livro.avaliacao ?? 0) ? '★' : '☆' }}</button>
+                      }
+                    </div>
+                  }
+                }
+
+                <span class="gerenciar">
+                  <a [routerLink]="['/livros', livro.id, 'editar']">
+                    Editar<span class="visualmente-oculto"> {{ livro.titulo }}</span>
+                  </a>
+                  <button type="button" class="remover" (click)="remover(livro)">
+                    Remover<span class="visualmente-oculto"> {{ livro.titulo }}</span>
+                  </button>
+                </span>
+              </footer>
+            </div>
+          </article>
+        </li>
+      } @empty {
+        <li class="sem-resultado">Nenhum livro encontrado. Tente outra busca ou mude os filtros.</li>
+      }
+    </ul>
+
+    @if (totalPaginas() > 1) {
+      <nav class="paginacao" aria-label="Paginação">
+        <p>Mostrando {{ faixa().inicio }} a {{ faixa().fim }} de {{ faixa().total }} livros</p>
+        <ul>
+          <li>
+            <button type="button" [disabled]="pagina() === 1" (click)="irParaPagina(pagina() - 1)">Anterior</button>
+          </li>
+          @for (item of paginas(); track $index) {
+            <li>
+              @if (item === null) {
+                <span class="salto" aria-hidden="true">…</span>
+              } @else {
+                <button type="button" [attr.aria-current]="item === pagina() ? 'page' : null"
+                        [attr.aria-label]="'Página ' + item" (click)="irParaPagina(item)">{{ item }}</button>
+              }
+            </li>
+          }
+          <li>
+            <button type="button" [disabled]="pagina() === totalPaginas()" (click)="irParaPagina(pagina() + 1)">Próxima</button>
+          </li>
+        </ul>
+      </nav>
+    }
+  }
+</section>

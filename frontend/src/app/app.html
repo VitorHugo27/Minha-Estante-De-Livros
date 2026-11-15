@@ -1,0 +1,37 @@
+<header class="cabecalho">
+  <a class="marca" routerLink="/">{{ titulo() }}</a>
+
+  <nav aria-label="Principal">
+    <ul>
+      <li>
+        <a routerLink="/" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+           ariaCurrentWhenActive="page">Estante</a>
+      </li>
+      <li>
+        <a routerLink="/estatisticas" routerLinkActive="ativo" ariaCurrentWhenActive="page">Estatísticas</a>
+      </li>
+      <li>
+        <a class="botao botao-primario" routerLink="/livros/novo" ariaCurrentWhenActive="page"
+           routerLinkActive="ativo">Adicionar livro</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Fica sempre na página (vazio) para o leitor de tela anunciar o aviso quando ele aparecer. -->
+<div class="avisos" role="status">
+  @if (avisoDeVersao(); as mensagem) {
+    <div class="faixa-versao">
+      <p>{{ mensagem }}</p>
+      <button type="button" class="botao botao-primario" (click)="recarregar()">Atualizar agora</button>
+    </div>
+  }
+</div>
+
+<main class="conteudo">
+  <router-outlet />
+</main>
+
+<footer class="rodape">
+  <p>{{ titulo() }}. Seu registro pessoal de leituras.</p>
+</footer>

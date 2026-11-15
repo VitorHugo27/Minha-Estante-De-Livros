@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  aspect-ratio: 2 / 3;
+  container-type: inline-size;
+}
+
+img,
+.tecido {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px 4px 4px 2px;
+}
+
+img {
+  object-fit: cover;
+  background: var(--linha);
+  box-shadow: 0 1px 3px rgb(30 39 37 / 0.25);
+}
+
+/* Capa de tecido: lombada mais escura à esquerda, título impresso, autor sob um filete. */
+.tecido {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6cqi;
+  padding: 12cqi 9cqi 10cqi 15cqi;
+  overflow: hidden;
+  background: var(--tecido);
+  color: #f4efe3;
+  box-shadow: inset 5cqi 0 0 rgb(0 0 0 / 0.22), 0 1px 3px rgb(30 39 37 / 0.25);
+}
+
+.titulo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-family: var(--fonte-livro);
+  font-size: max(9px, 13.5cqi);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.autor {
+  padding-top: 5cqi;
+  border-top: 1px solid rgb(244 239 227 / 0.6);
+  font-size: 8cqi;
+  line-height: 1.25;
+}
+
+/* Em capas pequenas, como as da lista, só o título cabe com conforto. */
+@container (width < 100px) {
+  .autor {
+    display: none;
+  }
+}
